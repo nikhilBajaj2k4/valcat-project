@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block content %}
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+
+  <div class="card">
+    <h2>Upload a raw lead CSV</h2>
+    <form method="post" action="{{ url_for('preview') }}" enctype="multipart/form-data" id="upload-form">
+      <div id="drop" class="dropzone" tabindex="0">
+        <div class="dz-empty">
+          <div class="dz-icon">⬆</div>
+          <div class="dz-title">Drop a CSV here or click to choose</div>
+          <div class="dz-help">
+            You'll map columns to ICP fields on the next screen.<br>
+            Extras are ignored; missing columns are tolerated.
+          </div>
+        </div>
+        <div class="dz-loaded">
+          <div class="dz-icon" style="color: var(--t1-fg);">✓</div>
+          <div class="dz-title">File ready</div>
+          <div class="dz-filename" id="dz-filename"></div>
+          <div class="dz-meta" id="dz-meta"></div>
+          <div class="dz-actions">
+            <button type="button" class="btn secondary" id="replace-file">Choose a different file</button>
+            <button type="button" class="btn secondary" id="remove-file">Remove</button>
+          </div>
+        </div>
+        <input type="file" name="csv" id="file" accept=".csv,text/csv" style="display: none;" required>
+      </div>
+
+      <div style="margin-top: 18px; display: flex; gap: 10px; align-items: center; justify-content: flex-end;">
+        <button class="btn" type="submit" id="submit-btn" disabled>Continue →</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top: 18px;">
+    <h2>What this does</h2>
+    <ul style="margin: 0; padding-left: 20px; color: var(--muted); font-size: 14px; line-height: 1.7;">
+      <li>You map your CSV columns to the ICP fields (auto-detection prefills the obvious ones).</li>
+      <li>De-duplicates by email and by (first, last, company) — strips Inc./LLC/Ltd/Corp variants.</li>
+      <li>Fixes name casing, trims whitespace, validates email format.</li>
+      <li>Drops free-domain emails (gmail, yahoo, outlook, etc.) and malformed addresses.</li>
+      <li>Buckets industry, title, and department into the rubric categories; scores 0–100; tiers 80+ / 55–79 / &lt;55.</li>
+      <li>Enrichment via Cloudflare DNS-over-HTTPS MX lookup — <strong>parallelized across unique domains</strong>, with jittered backoff on 429/5xx.</li>
+    </ul>
+  </div>
+
+  <script>
+    const drop = document.getElementById('drop');
+    const fileInput = document.getElementById('file');
+    const filenameEl = document.getElementById('dz-filename');
+    const metaEl = document.getElementById('dz-meta');
+    const submitBtn = document.getElementById('submit-btn');
+    const removeBtn = document.getElementById('remove-file');
+    const replaceBtn = document.getElementById('replace-file');
+    const form = document.getElementById('upload-form');
+
+    function fmtSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+    }
+
+    function setFile(file) {
+      filenameEl.textContent = file.name;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const lines = reader.result.split(/\r?\n/).filter(l => l.trim().length);
+        const rows = Math.max(0, lines.length - 1);
+        metaEl.textContent = `${fmtSize(file.size)} · ${rows.toLocaleString()} data row${rows === 1 ? '' : 's'} detected`;
+      };
+      reader.onerror = () => { metaEl.textContent = fmtSize(file.size); };
+      reader.readAsText(file);
+      drop.classList.add('has-file');
+      submitBtn.disabled = false;
+    }
+
+    function clearFile() {
+      fileInput.value = '';
+      drop.classList.remove('has-file');
+      submitBtn.disabled = true;
+    }
+
+    drop.addEventListener('click', e => {
+      if (drop.classList.contains('has-file')) return;
+      fileInput.click();
+    });
+    drop.addEventListener('keydown', e => {
+      if ((e.key === 'Enter' || e.key === ' ') && !drop.classList.contains('has-file')) {
+        e.preventDefault();
+        fileInput.click();
+      }
+    });
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length) setFile(fileInput.files[0]);
+    });
+    replaceBtn.addEventListener('click', e => { e.stopPropagation(); fileInput.click(); });
+    removeBtn.addEventListener('click', e => { e.stopPropagation(); clearFile(); });
+
+    ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, e => {
+      e.preventDefault(); drop.classList.add('dragging');
+    }));
+    ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => {
+      e.preventDefault(); drop.classList.remove('dragging');
+    }));
+    drop.addEventListener('drop', e => {
+      if (e.dataTransfer.files.length) {
+        // assign via DataTransfer so the file submits with the form
+        const dt = new DataTransfer();
+        dt.items.add(e.dataTransfer.files[0]);
+        fileInput.files = dt.files;
+        setFile(e.dataTransfer.files[0]);
+      }
+    });
+    form.addEventListener('submit', () => {
+      submitBtn.disabled = true; submitBtn.textContent = 'Reading…';
+    });
+  </script>
+{% endblock %}

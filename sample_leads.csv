@@ -1,0 +1,24 @@
+first_name,last_name,email,company,title,industry,employees,department
+john,SMITH,John.Smith@stripe.com,Stripe Inc.,VP of Sales,Software,8500,Sales
+  jane ,doe,jane.doe@hubspot.com,HubSpot,Chief Revenue Officer,SaaS,"7,500",Sales
+JANE,DOE,Jane.Doe@hubspot.com,HubSpot Inc,CRO,Saas,7500,Revenue
+priya,patel,priya@gitlab.com,GitLab,Director of Demand Generation,Software,"1,800",Marketing
+PRIYA,Patel,priya.patel@gitlab.com,GitLab Inc.,Director of Demand Gen,Software,1800,Marketing
+marcus,o'brien,marcus@datadoghq.com,Datadog,Head of RevOps,Technology,"4,500",Revenue Operations
+amy,nguyen,amy.nguyen@gmail.com,Personal Project,Founder,Software,3,
+bob,jones,not-an-email,Acme Co,Account Executive,Manufacturing,250,Sales
+sara,kim,sara.kim@snowflake.com,Snowflake,Sales Manager,Data,"6,000",Sales
+mike,brown,mike.brown@shopify.com,Shopify,Software Engineer,E-commerce,12000,Engineering
+li,wei,li.wei@twilio.com,Twilio,VP Marketing,Communications,"6,800",Marketing
+EMMA ,Williams,emma.williams@intercom.com,Intercom,Senior Account Executive,Software,1000,Sales
+diego,garcia,diego.garcia@asana.com,Asana,Director Sales Operations,SaaS,"1,500",Sales
+hannah,lee,Hannah.LEE@mongodb.com,MongoDB Inc.,Manager Customer Success,Software,5000,Customer Success
+,,@example.com,,,,,
+tomas,nilsson,tomas@nopebadcompanyz999xyz.invalid,Nope BadCompany Z999 XYZ,CEO,Software,300,
+karen,patel,karen.patel@yahoo.com,SmallBiz LLC,Owner,Retail,8,
+"olivia ","JOHNSON",olivia.johnson@atlassian.com,Atlassian,Head of Marketing,Software,"11,000",Marketing
+RAJ,kumar,raj.kumar@cloudflare.com,Cloudflare,Director of Sales,Internet,"3,500",Sales
+nina,roberts,nina.roberts@plaid.com,Plaid,Account Manager,FinTech,1200,Sales
+sam,white,sam.white@notion.so,Notion Labs Inc.,Marketing Manager,Software,800,Marketing
+chris,evans,chris evans @ vercel.com,Vercel,VP Engineering,Software,600,Engineering
+ALEX,Tan,alex.tan@figma.com,Figma,Chief Marketing Officer,Software,1500,Marketing

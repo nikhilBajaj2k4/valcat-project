@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+
+  <div class="card">
+    <h2>Map columns</h2>
+    <div style="display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; margin-bottom: 16px;">
+      <div class="muted" style="font-size: 13px;">
+        <strong style="color: var(--text);">{{ filename }}</strong> · {{ rows_count }} row{{ '' if rows_count == 1 else 's' }} · {{ headers|length }} column{{ '' if headers|length == 1 else 's' }}
+      </div>
+      <a class="muted" href="{{ url_for('index') }}" style="font-size: 13px;">← Upload a different file</a>
+    </div>
+
+    <form method="post" action="{{ url_for('process_with_mapping', token=token) }}">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+        {% for f in fields %}
+          {% set is_required = f.get('required', False) %}
+          <label style="display: block; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+              <span style="font-weight: 600;">{{ f.label }}</span>
+              {% if is_required %}<span class="badge tier-3" style="font-size: 10px;">required</span>{% endif %}
+            </div>
+            <select name="map[{{ f.key }}]"
+                    style="margin-top: 8px; width: 100%; padding: 8px 10px; background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 6px; font-size: 14px;"
+                    {% if is_required %}required{% endif %}>
+              <option value="">— not mapped —</option>
+              {% for h in headers %}
+                <option value="{{ h }}" {% if detected.get(f.key) == h %}selected{% endif %}>{{ h }}</option>
+              {% endfor %}
+            </select>
+            {% if detected.get(f.key) %}
+              <div class="muted" style="font-size: 11px; margin-top: 4px;">Auto-detected from <code>{{ detected[f.key] }}</code></div>
+            {% endif %}
+          </label>
+        {% endfor %}
+      </div>
+
+      <div style="margin-top: 22px; padding: 14px 16px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px; display: flex; gap: 14px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+        <label style="display: flex; gap: 8px; align-items: center; color: var(--text); font-size: 14px;">
+          <input type="checkbox" name="enrich" checked> Enrich with MX provider lookup
+          <span class="muted" style="font-size: 12px;">(parallel, ~10 lookups in flight, never blocks on errors)</span>
+        </label>
+        <button class="btn" type="submit" id="run-btn">Process →</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card" style="margin-top: 18px;">
+    <h2>Sample rows</h2>
+    {% if sample_rows %}
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th>{% for h in headers %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+          <tbody>
+            {% for r in sample_rows %}
+              <tr><td class="row-num">{{ loop.index }}</td>
+                {% for h in headers %}
+                  <td style="max-width: 240px; overflow: hidden; text-overflow: ellipsis;">{{ r.get(h, '') }}</td>
+                {% endfor %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted">No sample rows.</p>
+    {% endif %}
+  </div>
+
+  <script>
+    document.querySelector('form').addEventListener('submit', () => {
+      const b = document.getElementById('run-btn');
+      b.disabled = true; b.textContent = 'Processing…';
+    });
+  </script>
+{% endblock %}

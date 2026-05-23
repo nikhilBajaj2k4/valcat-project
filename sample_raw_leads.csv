@@ -1,0 +1,7 @@
+email,first_name,last_name,name,title,company,industry,employees,department
+john.doe@acmecorp.com,John,Doe,John Doe,VP Sales,Acme Corp,software,350,Sales
+jane.smith@gmail.com,Jane,Smith,Jane Smith,Marketing Manager,Widget Co,Technology,75,Marketing
+bob@invalid, Bob,,Bob,,Bad Company,Unknown,10,
+joe.lopez@nicebiz.com,Joe,Lopez,,Head of Revenue Operations,NiceBiz,SaAs,1200,Revenue Operations
+JOHN.DOE@ACMECORP.COM,John,Doe,John Doe,VP Sales,Acme Corp,Software,350,Sales
+marta.k@mediapros.io,Marta,K,Marketing Lead,MediaPros,Media,220,Marketing

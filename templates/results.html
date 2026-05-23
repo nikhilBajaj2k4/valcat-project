@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="grid cols-3">
+    <div class="stat">
+      <div class="label">Rows in</div>
+      <div class="value">{{ stats.rows_in }}</div>
+      <div class="muted" style="font-size: 12px; margin-top: 4px;">from {{ filename }}</div>
+    </div>
+    <div class="stat">
+      <div class="label">Rows kept</div>
+      <div class="value">{{ stats.rows_kept }}</div>
+      <div class="muted" style="font-size: 12px; margin-top: 4px;">
+        {% if stats.rows_in %}{{ (100 * stats.rows_kept / stats.rows_in) | round(1) }}%{% else %}—{% endif %} of input
+      </div>
+    </div>
+    <div class="stat">
+      <div class="label">Dropped</div>
+      <div class="value">{{ dropped }}</div>
+      <div class="muted" style="font-size: 12px; margin-top: 4px;">
+        {% if stats.unique_domains_enriched %}
+          Enriched {{ stats.unique_domains_enriched }} unique domain{{ '' if stats.unique_domains_enriched == 1 else 's' }} in {{ stats.enrich_seconds }}s
+          {% if stats.enrichment_failures %} · {{ stats.enrichment_failures }} failed{% endif %}
+        {% else %}&nbsp;{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="grid cols-2" style="margin-top: 18px;">
+    <div class="card">
+      <h2>Tier breakdown</h2>
+      <div style="display: flex; gap: 14px; flex-wrap: wrap;">
+        {% for label, count in tier_counts %}
+          <div class="stat" style="flex: 1; min-width: 100px;">
+            <span class="badge tier-{{ loop.index }}">{{ label }}</span>
+            <div class="value small" style="margin-top: 8px;">{{ count }}</div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="card">
+      <h2>Drop reasons</h2>
+      {% if drop_reasons %}
+        <ul class="reasons" style="margin: 0; padding-left: 20px; color: var(--text); font-size: 14px;">
+          {% for reason, count in drop_reasons %}
+            <li><span class="badge muted">{{ count }}</span>&nbsp; {{ reason.replace('_', ' ') }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="muted" style="margin: 0;">No rows dropped.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 18px;">
+    <div class="actions" style="margin-bottom: 14px; justify-content: space-between;">
+      <h2 style="margin: 0;">Kept leads · sorted by score</h2>
+      <a class="btn" href="{{ url_for('download', token=token) }}">Download cleaned CSV</a>
+    </div>
+    {% if rows %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Company</th>
+              <th>Title</th>
+              <th>Seniority</th>
+              <th>Dept</th>
+              <th>Industry</th>
+              <th>Emp</th>
+              <th>MX</th>
+              <th>Score · breakdown</th>
+              <th>Tier</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% macro chip(label, pts, max_pts) -%}
+              {% set cls = 'hot' if pts == max_pts else ('warm' if pts > 0 else 'cold') %}
+              <span class="chip {{ cls }}" title="{{ label }}: +{{ pts }} (max {{ max_pts }})">
+                <span class="label">{{ label }}</span>+{{ pts }}
+              </span>
+            {%- endmacro %}
+            {% for r in rows %}
+              {% set tier_class = 'tier-1' if r.tier == 'Tier 1' else ('tier-2' if r.tier == 'Tier 2' else 'tier-3') %}
+              <tr>
+                <td class="row-num">{{ loop.index }}</td>
+                <td>{{ r.first_name }} {{ r.last_name }}</td>
+                <td><a href="mailto:{{ r.email }}">{{ r.email }}</a></td>
+                <td>{{ r.company }}</td>
+                <td>{{ r.title }}</td>
+                <td>{{ r.seniority }}</td>
+                <td>{{ r.department }}</td>
+                <td>{{ r.industry }}</td>
+                <td>{{ r.employees }}</td>
+                <td><span class="muted">{{ r.mx_provider or '—' }}</span></td>
+                <td class="score-cell">
+                  <div>
+                    <span class="score-bar"><span style="width: {{ r.score }}%;"></span></span>
+                    <strong>{{ r.score }}</strong>
+                  </div>
+                  <div class="pts">
+                    {{ chip('industry',  r.industry_pts,    30) }}
+                    {{ chip('employees', r.employees_pts,   30) }}
+                    {{ chip('title',     r.seniority_pts,   25) }}
+                    {{ chip('dept',      r.department_pts,  15) }}
+                  </div>
+                </td>
+                <td><span class="badge {{ tier_class }}">{{ r.tier }}</span></td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="muted">No rows survived the filters.</p>
+    {% endif %}
+  </div>
+{% endblock %}
