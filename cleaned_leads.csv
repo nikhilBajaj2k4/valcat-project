@@ -1,0 +1,4 @@
+email,first_name,last_name,name,company,industry,title,title_bucket,department,employees,score,tier,email_domain,enriched_domain_info
+john.doe@acmecorp.com,John,Doe,John Doe,Acme Corp,Software,VP Sales,IC,Sales,350,75,Tier 2,acmecorp.com,http-error-401
+joe.lopez@nicebiz.com,Joe,Lopez,Joe Lopez,Nicebiz,Software,Head of Revenue Operations,Director/Head,Sales,1200,90,Tier 1,nicebiz.com,http-error-401
+marta.k@mediapros.io,Marta,K,Marta K,Media,Other,MediaPros,IC,Other,Marketing,5,Tier 3,mediapros.io,http-error-401
